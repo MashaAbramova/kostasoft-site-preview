@@ -1,0 +1,124 @@
+backend:
+  name: github
+  repo: MashaAbramova/kostasoft-site
+  branch: merge-pr-3-safe
+
+local_backend: true
+
+media_folder: "prototypes/stage-1-astro/public/uploads/news"
+public_folder: "/uploads/news"
+
+site_url: "https://mashaabramova.github.io/kostasoft-site-preview"
+display_url: "https://mashaabramova.github.io/kostasoft-site-preview"
+logo_url: "/kostasoft-site-preview/favicon.svg"
+locale: "ru"
+
+collections:
+  - name: "news"
+    label: "Новости"
+    label_singular: "Материал"
+    folder: "prototypes/stage-1-astro/src/content/news"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}} — {{type}}"
+    sortable_fields: ["publishDate", "title", "type"]
+    view_filters:
+      - label: "Опубликовано"
+        field: "draft"
+        pattern: false
+      - label: "Черновики"
+        field: "draft"
+        pattern: true
+      - label: "Видео"
+        field: "type"
+        pattern: "video"
+    fields:
+      - label: "Черновик"
+        name: "draft"
+        widget: "boolean"
+        default: true
+        hint: "Оставьте включенным, пока материал не проверен. Для публикации снимите галочку."
+      - label: "Тип материала"
+        name: "type"
+        widget: "select"
+        default: "news"
+        options:
+          - { label: "Новость", value: "news" }
+          - { label: "Видео", value: "video" }
+          - { label: "Статья", value: "article" }
+          - { label: "Кейс", value: "case" }
+          - { label: "Вебинар", value: "webinar" }
+      - label: "Заголовок"
+        name: "title"
+        widget: "string"
+      - label: "Краткое описание"
+        name: "description"
+        widget: "text"
+        hint: "1-2 предложения для карточки, страницы и поискового описания."
+      - label: "Дата публикации"
+        name: "publishDate"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+      - label: "Дата обновления"
+        name: "updatedDate"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+      - label: "Рубрика"
+        name: "category"
+        widget: "string"
+        required: false
+      - label: "Теги"
+        name: "tags"
+        widget: "list"
+        required: false
+      - label: "Показывать в подборках"
+        name: "featured"
+        widget: "boolean"
+        default: false
+        required: false
+      - label: "Обложка"
+        name: "coverImage"
+        widget: "image"
+        required: false
+        hint: "Рекомендуемый формат: WebP/JPG, 1200x675 или похожее соотношение 16:9."
+      - label: "Alt-текст обложки"
+        name: "coverAlt"
+        widget: "string"
+        required: false
+      - label: "Ссылка на видео"
+        name: "videoUrl"
+        widget: "string"
+        required: false
+        hint: "Для видео вставьте embed-ссылку видеохостинга. Сам видеофайл не загружайте в сайт."
+      - label: "Видеохостинг"
+        name: "videoProvider"
+        widget: "string"
+        required: false
+        hint: "Например: VK Video, RuTube, YouTube."
+      - label: "Длительность видео"
+        name: "videoDuration"
+        widget: "string"
+        required: false
+        hint: "Для schema.org лучше использовать ISO 8601, например PT5M30S."
+      - label: "Расшифровка видео"
+        name: "transcript"
+        widget: "text"
+        required: false
+      - label: "SEO title"
+        name: "seoTitle"
+        widget: "string"
+        required: false
+      - label: "SEO description"
+        name: "seoDescription"
+        widget: "text"
+        required: false
+      - label: "Текст материала"
+        name: "body"
+        widget: "markdown"
