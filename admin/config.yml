@@ -2,6 +2,9 @@ backend:
   name: github
   repo: MashaAbramova/kostasoft-site
   branch: merge-pr-3-safe
+  # GitHub Pages не умеет выполнять OAuth callback сам.
+  # После развертывания OAuth provider раскомментируйте строку ниже:
+  # base_url: https://your-decap-oauth-provider.example.com
 
 local_backend: true
 
