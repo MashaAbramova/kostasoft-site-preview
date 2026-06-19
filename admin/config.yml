@@ -17,6 +17,30 @@ logo_url: "/kostasoft-site-preview/favicon.svg"
 locale: "ru"
 
 collections:
+  - name: "settings"
+    label: "Настройки сайта"
+    files:
+      - name: "newsHome"
+        label: "Блок новостей на главной"
+        file: "prototypes/stage-1-astro/src/content/settings/news-home.md"
+        fields:
+          - { label: "Показывать блок", name: "enabled", widget: "boolean", default: true }
+          - { label: "Заголовок блока", name: "title", widget: "string", default: "Новости и материалы" }
+          - { label: "Текст кнопки", name: "buttonText", widget: "string", default: "Все новости" }
+          - { label: "Количество материалов", name: "limit", widget: "number", default: 3, min: 1, max: 12, value_type: "int" }
+          - label: "Режим вывода"
+            name: "mode"
+            widget: "select"
+            default: "auto"
+            options:
+              - { label: "Автоматически: последние публикации", value: "auto" }
+              - { label: "Вручную: выбранные slug", value: "manual" }
+          - label: "Slug публикаций для ручного режима"
+            name: "manualNews"
+            widget: "list"
+            required: false
+            hint: "Укажите slug материалов в нужном порядке, например avicenna-telemedforum-2026."
+
   - name: "news"
     label: "Новости"
     label_singular: "Материал"
@@ -25,38 +49,42 @@ collections:
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     extension: "md"
     format: "frontmatter"
-    summary: "{{title}} — {{type}}"
-    sortable_fields: ["publishDate", "title", "type"]
+    summary: "{{title}} — {{category}}"
+    sortable_fields: ["publishDate", "title", "category", "status"]
     view_filters:
       - label: "Опубликовано"
-        field: "draft"
-        pattern: false
+        field: "status"
+        pattern: "published"
       - label: "Черновики"
-        field: "draft"
-        pattern: true
-      - label: "Видео"
-        field: "type"
-        pattern: "video"
+        field: "status"
+        pattern: "draft"
+      - label: "Скрыто"
+        field: "status"
+        pattern: "hidden"
     fields:
-      - label: "Черновик"
-        name: "draft"
-        widget: "boolean"
-        default: true
-        hint: "Оставьте включенным, пока материал не проверен. Для публикации снимите галочку."
+      - label: "Статус"
+        name: "status"
+        widget: "select"
+        default: "draft"
+        options:
+          - { label: "Черновик", value: "draft" }
+          - { label: "Опубликовано", value: "published" }
+          - { label: "Скрыто", value: "hidden" }
       - label: "Тип материала"
         name: "type"
         widget: "select"
         default: "news"
         options:
           - { label: "Новость", value: "news" }
-          - { label: "Видео", value: "video" }
           - { label: "Статья", value: "article" }
           - { label: "Кейс", value: "case" }
-          - { label: "Вебинар", value: "webinar" }
+          - { label: "Исследование", value: "research" }
+          - { label: "Мероприятие", value: "event" }
+          - { label: "Видео", value: "video" }
       - label: "Заголовок"
         name: "title"
         widget: "string"
-      - label: "Краткое описание"
+      - label: "Краткий анонс"
         name: "description"
         widget: "text"
         hint: "1-2 предложения для карточки, страницы и поискового описания."
@@ -73,14 +101,34 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: false
         format: "YYYY-MM-DD"
-      - label: "Рубрика"
+      - label: "Категория"
         name: "category"
-        widget: "string"
-        required: false
+        widget: "select"
+        default: "Новости компании"
+        options:
+          - "Новости компании"
+          - "МИС Авиценна"
+          - "Докки"
+          - "Докки. Эксперт"
+          - "Исследования"
+          - "Аналитика"
+          - "Кейсы"
+          - "Мероприятия"
+          - "Интеграции"
+          - "Цифровая медицина"
       - label: "Теги"
         name: "tags"
         widget: "list"
         required: false
+      - label: "Автор"
+        name: "author"
+        widget: "string"
+        default: "Команда КостаСофт"
+      - label: "Время чтения"
+        name: "readingTime"
+        widget: "string"
+        required: false
+        hint: "Например: 4 минуты."
       - label: "Показывать в подборках"
         name: "featured"
         widget: "boolean"
@@ -95,6 +143,36 @@ collections:
         name: "coverAlt"
         widget: "string"
         required: false
+      - label: "Галерея изображений"
+        name: "gallery"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Изображение", name: "image", widget: "image" }
+          - { label: "Alt-текст", name: "alt", widget: "string", required: false }
+          - { label: "Подпись", name: "caption", widget: "string", required: false }
+      - label: "Внешние документы и PDF"
+        name: "attachments"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Название", name: "title", widget: "string" }
+          - { label: "Ссылка", name: "url", widget: "string" }
+      - label: "Встроенные материалы"
+        name: "embeds"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Название", name: "title", widget: "string" }
+          - { label: "Ссылка для встраивания", name: "url", widget: "string" }
+          - label: "Тип"
+            name: "type"
+            widget: "select"
+            default: "document"
+            options:
+              - { label: "Презентация", value: "presentation" }
+              - { label: "Документ", value: "document" }
+              - { label: "Видео", value: "video" }
       - label: "Ссылка на видео"
         name: "videoUrl"
         widget: "string"
@@ -121,6 +199,10 @@ collections:
       - label: "SEO description"
         name: "seoDescription"
         widget: "text"
+        required: false
+      - label: "SEO keywords"
+        name: "seoKeywords"
+        widget: "list"
         required: false
       - label: "Текст материала"
         name: "body"
