@@ -1,19 +1,19 @@
 backend:
   name: github
   repo: MashaAbramova/kostasoft-site
-  branch: merge-pr-3-safe
+  branch: main
   # GitHub Pages не умеет выполнять OAuth callback сам.
   # После развертывания OAuth provider раскомментируйте строку ниже:
   # base_url: https://your-decap-oauth-provider.example.com
 
 local_backend: true
 
-media_folder: "prototypes/stage-1-astro/public/uploads/news"
+media_folder: "public/uploads/news"
 public_folder: "/uploads/news"
 
-site_url: "https://mashaabramova.github.io/kostasoft-site-preview"
-display_url: "https://mashaabramova.github.io/kostasoft-site-preview"
-logo_url: "/kostasoft-site-preview/favicon.svg"
+site_url: "https://www.kostasoft.ru/2026"
+display_url: "https://www.kostasoft.ru/2026"
+logo_url: "/2026/favicon.svg"
 locale: "ru"
 
 collections:
@@ -22,7 +22,7 @@ collections:
     files:
       - name: "newsHome"
         label: "Блок новостей на главной"
-        file: "prototypes/stage-1-astro/src/content/settings/news-home.md"
+        file: "src/content/settings/news-home.md"
         fields:
           - { label: "Показывать блок", name: "enabled", widget: "boolean", default: true }
           - { label: "Заголовок блока", name: "title", widget: "string", default: "Новости и материалы" }
@@ -44,7 +44,7 @@ collections:
   - name: "news"
     label: "Новости"
     label_singular: "Материал"
-    folder: "prototypes/stage-1-astro/src/content/news"
+    folder: "src/content/news"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     extension: "md"
