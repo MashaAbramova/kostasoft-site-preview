@@ -40,6 +40,50 @@ collections:
             widget: "list"
             required: false
             hint: "Укажите slug материалов в нужном порядке, например avicenna-telemedforum-2026."
+      - name: "trustedClients"
+        label: "Блок «Нам доверяют»"
+        file: "src/data/trusted-clients.json"
+        media_folder: "public/uploads/clients"
+        public_folder: "/uploads/clients"
+        fields:
+          - { label: "Служебная надпись", name: "eyebrow", widget: "string" }
+          - { label: "Заголовок", name: "title", widget: "string" }
+          - { label: "Описание", name: "description", widget: "text", required: false }
+          - label: "Показатели"
+            name: "metrics"
+            widget: "list"
+            required: false
+            fields:
+              - { label: "Значение", name: "value", widget: "string" }
+              - { label: "Подпись", name: "label", widget: "string" }
+          - label: "Клиенты"
+            name: "clients"
+            widget: "list"
+            fields:
+              - { label: "Опубликовано", name: "published", widget: "boolean", default: true }
+              - { label: "Порядок", name: "order", widget: "number", value_type: "int", min: 1 }
+              - { label: "Название", name: "name", widget: "string" }
+              - { label: "Город", name: "city", widget: "string", required: false }
+              - { label: "Описание", name: "description", widget: "text" }
+              - { label: "Рабочие места", name: "workplaces", widget: "string" }
+              - { label: "Логотип", name: "logo", widget: "image", required: false }
+              - { label: "Изображение объекта", name: "image", widget: "image", required: false }
+              - label: "Теги"
+                name: "tags"
+                widget: "list"
+                required: false
+              - { label: "Текст ссылки на кейс", name: "caseTitle", widget: "string", required: false }
+              - { label: "URL кейса", name: "caseUrl", widget: "string", required: false }
+              - { label: "Открыть кейс в новой вкладке", name: "newTab", widget: "boolean", default: false }
+          - label: "CTA"
+            name: "cta"
+            widget: "object"
+            fields:
+              - { label: "Заголовок", name: "title", widget: "string", required: false }
+              - { label: "Описание", name: "description", widget: "text", required: false }
+              - { label: "Текст кнопки", name: "label", widget: "string" }
+              - { label: "URL кнопки", name: "url", widget: "string" }
+              - { label: "Открыть в новой вкладке", name: "newTab", widget: "boolean", default: false }
 
   - name: "news"
     label: "Новости"
