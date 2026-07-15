@@ -1,0 +1,253 @@
+backend:
+  name: github
+  repo: MashaAbramova/kostasoft-site
+  branch: main
+  # GitHub Pages не умеет выполнять OAuth callback сам.
+  # После развертывания OAuth provider раскомментируйте строку ниже:
+  # base_url: https://your-decap-oauth-provider.example.com
+
+local_backend: true
+
+media_folder: "public/uploads/news"
+public_folder: "/uploads/news"
+
+site_url: "https://www.kostasoft.ru/2026"
+display_url: "https://www.kostasoft.ru/2026"
+logo_url: "/2026/favicon.svg"
+locale: "ru"
+
+collections:
+  - name: "settings"
+    label: "Настройки сайта"
+    files:
+      - name: "newsHome"
+        label: "Блок новостей на главной"
+        file: "src/content/settings/news-home.md"
+        fields:
+          - { label: "Показывать блок", name: "enabled", widget: "boolean", default: true }
+          - { label: "Заголовок блока", name: "title", widget: "string", default: "Новости и материалы" }
+          - { label: "Текст кнопки", name: "buttonText", widget: "string", default: "Все новости" }
+          - { label: "Количество материалов", name: "limit", widget: "number", default: 3, min: 1, max: 12, value_type: "int" }
+          - label: "Режим вывода"
+            name: "mode"
+            widget: "select"
+            default: "auto"
+            options:
+              - { label: "Автоматически: последние публикации", value: "auto" }
+              - { label: "Вручную: выбранные slug", value: "manual" }
+          - label: "Slug публикаций для ручного режима"
+            name: "manualNews"
+            widget: "list"
+            required: false
+            hint: "Укажите slug материалов в нужном порядке, например avicenna-telemedforum-2026."
+      - name: "trustedClients"
+        label: "Блок «Нам доверяют»"
+        file: "src/data/trusted-clients.json"
+        media_folder: "public/uploads/clients"
+        public_folder: "/uploads/clients"
+        fields:
+          - { label: "Служебная надпись", name: "eyebrow", widget: "string" }
+          - { label: "Заголовок", name: "title", widget: "string" }
+          - { label: "Описание", name: "description", widget: "text", required: false }
+          - label: "Показатели"
+            name: "metrics"
+            widget: "list"
+            required: false
+            fields:
+              - { label: "Значение", name: "value", widget: "string" }
+              - { label: "Подпись", name: "label", widget: "string" }
+          - label: "Клиенты"
+            name: "clients"
+            widget: "list"
+            fields:
+              - { label: "Опубликовано", name: "published", widget: "boolean", default: true }
+              - { label: "Порядок", name: "order", widget: "number", value_type: "int", min: 1 }
+              - { label: "Название", name: "name", widget: "string" }
+              - { label: "Город", name: "city", widget: "string", required: false }
+              - { label: "Описание", name: "description", widget: "text" }
+              - { label: "Рабочие места", name: "workplaces", widget: "string" }
+              - { label: "Логотип", name: "logo", widget: "image", required: false }
+              - { label: "Изображение объекта", name: "image", widget: "image", required: false }
+              - label: "Теги"
+                name: "tags"
+                widget: "list"
+                required: false
+              - { label: "Текст ссылки на кейс", name: "caseTitle", widget: "string", required: false }
+              - { label: "URL кейса", name: "caseUrl", widget: "string", required: false }
+              - { label: "Открыть кейс в новой вкладке", name: "newTab", widget: "boolean", default: false }
+          - label: "CTA"
+            name: "cta"
+            widget: "object"
+            fields:
+              - { label: "Заголовок", name: "title", widget: "string", required: false }
+              - { label: "Описание", name: "description", widget: "text", required: false }
+              - { label: "Текст кнопки", name: "label", widget: "string" }
+              - { label: "URL кнопки", name: "url", widget: "string" }
+              - { label: "Открыть в новой вкладке", name: "newTab", widget: "boolean", default: false }
+
+  - name: "news"
+    label: "Новости"
+    label_singular: "Материал"
+    folder: "src/content/news"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}} — {{category}}"
+    sortable_fields: ["publishDate", "title", "category", "status"]
+    view_filters:
+      - label: "Опубликовано"
+        field: "status"
+        pattern: "published"
+      - label: "Черновики"
+        field: "status"
+        pattern: "draft"
+      - label: "Скрыто"
+        field: "status"
+        pattern: "hidden"
+    fields:
+      - label: "Статус"
+        name: "status"
+        widget: "select"
+        default: "draft"
+        options:
+          - { label: "Черновик", value: "draft" }
+          - { label: "Опубликовано", value: "published" }
+          - { label: "Скрыто", value: "hidden" }
+      - label: "Тип материала"
+        name: "type"
+        widget: "select"
+        default: "news"
+        options:
+          - { label: "Новость", value: "news" }
+          - { label: "Статья", value: "article" }
+          - { label: "Кейс", value: "case" }
+          - { label: "Исследование", value: "research" }
+          - { label: "Мероприятие", value: "event" }
+          - { label: "Видео", value: "video" }
+      - label: "Заголовок"
+        name: "title"
+        widget: "string"
+      - label: "Краткий анонс"
+        name: "description"
+        widget: "text"
+        hint: "1-2 предложения для карточки, страницы и поискового описания."
+      - label: "Дата публикации"
+        name: "publishDate"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+      - label: "Дата обновления"
+        name: "updatedDate"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+      - label: "Категория"
+        name: "category"
+        widget: "select"
+        default: "Новости компании"
+        options:
+          - "Новости компании"
+          - "МИС Авиценна"
+          - "Докки"
+          - "Докки. Эксперт"
+          - "Исследования"
+          - "Аналитика"
+          - "Кейсы"
+          - "Мероприятия"
+          - "Интеграции"
+          - "Цифровая медицина"
+      - label: "Теги"
+        name: "tags"
+        widget: "list"
+        required: false
+      - label: "Автор"
+        name: "author"
+        widget: "string"
+        default: "Команда КостаСофт"
+      - label: "Время чтения"
+        name: "readingTime"
+        widget: "string"
+        required: false
+        hint: "Например: 4 минуты."
+      - label: "Показывать в подборках"
+        name: "featured"
+        widget: "boolean"
+        default: false
+        required: false
+      - label: "Обложка"
+        name: "coverImage"
+        widget: "image"
+        required: false
+        hint: "Рекомендуемый формат: WebP/JPG, 1200x675 или похожее соотношение 16:9."
+      - label: "Alt-текст обложки"
+        name: "coverAlt"
+        widget: "string"
+        required: false
+      - label: "Галерея изображений"
+        name: "gallery"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Изображение", name: "image", widget: "image" }
+          - { label: "Alt-текст", name: "alt", widget: "string", required: false }
+          - { label: "Подпись", name: "caption", widget: "string", required: false }
+      - label: "Внешние документы и PDF"
+        name: "attachments"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Название", name: "title", widget: "string" }
+          - { label: "Ссылка", name: "url", widget: "string" }
+      - label: "Встроенные материалы"
+        name: "embeds"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Название", name: "title", widget: "string" }
+          - { label: "Ссылка для встраивания", name: "url", widget: "string" }
+          - label: "Тип"
+            name: "type"
+            widget: "select"
+            default: "document"
+            options:
+              - { label: "Презентация", value: "presentation" }
+              - { label: "Документ", value: "document" }
+              - { label: "Видео", value: "video" }
+      - label: "Ссылка на видео"
+        name: "videoUrl"
+        widget: "string"
+        required: false
+        hint: "Для видео вставьте embed-ссылку видеохостинга. Сам видеофайл не загружайте в сайт."
+      - label: "Видеохостинг"
+        name: "videoProvider"
+        widget: "string"
+        required: false
+        hint: "Например: VK Video, RuTube, YouTube."
+      - label: "Длительность видео"
+        name: "videoDuration"
+        widget: "string"
+        required: false
+        hint: "Для schema.org лучше использовать ISO 8601, например PT5M30S."
+      - label: "Расшифровка видео"
+        name: "transcript"
+        widget: "text"
+        required: false
+      - label: "SEO title"
+        name: "seoTitle"
+        widget: "string"
+        required: false
+      - label: "SEO description"
+        name: "seoDescription"
+        widget: "text"
+        required: false
+      - label: "SEO keywords"
+        name: "seoKeywords"
+        widget: "list"
+        required: false
+      - label: "Текст материала"
+        name: "body"
+        widget: "markdown"
