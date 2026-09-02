@@ -7,6 +7,321 @@
     <title>Редактор новостей — KostaSoft</title>
   </head>
   <body>
+    <script>
+      if (window.crypto && !window.crypto.randomUUID && window.crypto.getRandomValues) {
+        window.crypto.randomUUID = function () {
+          const bytes = new Uint8Array(16);
+          window.crypto.getRandomValues(bytes);
+          bytes[6] = (bytes[6] & 15) | 64;
+          bytes[8] = (bytes[8] & 63) | 128;
+          const hex = Array.from(bytes, (value) => value.toString(16).padStart(2, "0"));
+          return [
+            hex.slice(0, 4).join(""),
+            hex.slice(4, 6).join(""),
+            hex.slice(6, 8).join(""),
+            hex.slice(8, 10).join(""),
+            hex.slice(10, 16).join(""),
+          ].join("-");
+        };
+      }
+    </script>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script>
+      (function registerImageDimensionValidation() {
+        const imageSizeCache = new Map();
+        let textLengthLimitsPromise = null;
+        const textWidgets = new Set(["string", "text", "markdown"]);
+
+        function toPlain(value) {
+          if (!value) return value;
+          if (typeof value.toJS === "function") return value.toJS();
+          return value;
+        }
+
+        function normalizeRatio(value) {
+          if (!value) return null;
+          if (typeof value === "number") return value;
+          if (typeof value === "string") {
+            const parts = value.split(":").map(Number);
+            if (parts.length === 2 && parts.every((part) => Number.isFinite(part) && part > 0)) {
+              return parts[0] / parts[1];
+            }
+          }
+          return null;
+        }
+
+        function parseScalar(value) {
+          const trimmed = value.trim();
+          if (/^-?\d+$/.test(trimmed)) return Number(trimmed);
+          if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+            return trimmed.slice(1, -1);
+          }
+          return trimmed;
+        }
+
+        function parseSimpleYaml(content) {
+          const root = {};
+          const stack = [{ indent: -1, value: root }];
+
+          for (const rawLine of content.split(/\r?\n/)) {
+            if (!rawLine.trim() || rawLine.trimStart().startsWith("#")) continue;
+
+            const indent = rawLine.match(/^\s*/)[0].length;
+            const line = rawLine.trim();
+            const separatorIndex = line.indexOf(":");
+            if (separatorIndex < 0) continue;
+
+            const rawKey = line.slice(0, separatorIndex).trim();
+            const rawValue = line.slice(separatorIndex + 1);
+            const key = parseScalar(rawKey);
+
+            while (stack.length > 1 && indent <= stack[stack.length - 1].indent) {
+              stack.pop();
+            }
+
+            const parent = stack[stack.length - 1].value;
+            if (rawValue.trim() === "") {
+              const next = {};
+              parent[key] = next;
+              stack.push({ indent, value: next });
+            } else {
+              parent[key] = parseScalar(rawValue);
+            }
+          }
+
+          return root;
+        }
+
+        async function loadTextLengthLimits() {
+          if (!textLengthLimitsPromise) {
+            textLengthLimitsPromise = fetch("settings-validation.yml", { cache: "no-store" })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error(`settings-validation.yml: ${response.status}`);
+                }
+                return response.text();
+              })
+              .then(parseSimpleYaml)
+              .catch((error) => {
+                console.error("Не удалось загрузить ограничения длины CMS-полей.", error);
+                return {};
+              });
+          }
+
+          return textLengthLimitsPromise;
+        }
+
+        function findCollectionConfig(config, collectionName) {
+          return config.collections?.find((collection) => collection.name === collectionName) ?? null;
+        }
+
+        function findFileConfig(collectionConfig, entryPath) {
+          if (!collectionConfig?.files || !entryPath) return null;
+          return collectionConfig.files.find((fileConfig) => fileConfig.file === entryPath) ?? null;
+        }
+
+        function resolveImageUrl(value) {
+          if (!value || typeof value !== "string") return null;
+          if (/^https?:\/\//i.test(value)) return value;
+          if (value.startsWith("/")) return new URL(value, window.location.origin).href;
+          return new URL(value.replace(/^\.\//, ""), window.location.origin + "/").href;
+        }
+
+        function getRule(fieldConfig) {
+          const rule = fieldConfig?.dimension_validation;
+          if (!rule || typeof rule !== "object") return null;
+          return {
+            width: Number.isFinite(Number(rule.width)) ? Number(rule.width) : null,
+            height: Number.isFinite(Number(rule.height)) ? Number(rule.height) : null,
+            minWidth: Number.isFinite(Number(rule.minWidth)) ? Number(rule.minWidth) : null,
+            maxWidth: Number.isFinite(Number(rule.maxWidth)) ? Number(rule.maxWidth) : null,
+            minHeight: Number.isFinite(Number(rule.minHeight)) ? Number(rule.minHeight) : null,
+            maxHeight: Number.isFinite(Number(rule.maxHeight)) ? Number(rule.maxHeight) : null,
+            aspectRatio: normalizeRatio(rule.aspectRatio ?? rule.ratio),
+            tolerance: Number.isFinite(Number(rule.tolerance)) ? Number(rule.tolerance) : 0.01,
+          };
+        }
+
+        async function getImageSize(url) {
+          if (imageSizeCache.has(url)) return imageSizeCache.get(url);
+
+          const sizePromise = new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
+            image.onerror = () => reject(new Error("Не удалось загрузить изображение для проверки размеров."));
+            image.src = url;
+          });
+
+          imageSizeCache.set(url, sizePromise);
+          return sizePromise;
+        }
+
+        function formatPath(pathSegments) {
+          return pathSegments.join(" > ");
+        }
+
+        function getTextLength(value) {
+          return typeof value === "string" ? Array.from(value).length : 0;
+        }
+
+        function validateTextLength(fieldConfig, value, pathSegments, keyPath, lengthLimits, errors) {
+          if (!textWidgets.has(fieldConfig?.widget) || typeof value !== "string") return;
+
+          const maxLength = lengthLimits?.[keyPath];
+          if (!Number.isFinite(maxLength)) return;
+
+          const actualLength = getTextLength(value);
+          if (actualLength > maxLength) {
+            errors.push(`${formatPath(pathSegments)}: максимум ${maxLength} символов, сейчас ${actualLength}`);
+          }
+        }
+
+        function validateDimensions(label, size, rule) {
+          const messages = [];
+
+          if (rule.width !== null && size.width !== rule.width) {
+            messages.push(`ширина должна быть ${rule.width}px, сейчас ${size.width}px`);
+          }
+          if (rule.height !== null && size.height !== rule.height) {
+            messages.push(`высота должна быть ${rule.height}px, сейчас ${size.height}px`);
+          }
+          if (rule.minWidth !== null && size.width < rule.minWidth) {
+            messages.push(`ширина должна быть не меньше ${rule.minWidth}px, сейчас ${size.width}px`);
+          }
+          if (rule.maxWidth !== null && size.width > rule.maxWidth) {
+            messages.push(`ширина должна быть не больше ${rule.maxWidth}px, сейчас ${size.width}px`);
+          }
+          if (rule.minHeight !== null && size.height < rule.minHeight) {
+            messages.push(`высота должна быть не меньше ${rule.minHeight}px, сейчас ${size.height}px`);
+          }
+          if (rule.maxHeight !== null && size.height > rule.maxHeight) {
+            messages.push(`высота должна быть не больше ${rule.maxHeight}px, сейчас ${size.height}px`);
+          }
+          if (rule.aspectRatio !== null) {
+            const actualRatio = size.width / size.height;
+            if (Math.abs(actualRatio - rule.aspectRatio) > rule.tolerance) {
+              messages.push(`соотношение сторон должно быть ${rule.aspectRatio.toFixed(4)}, сейчас ${(actualRatio).toFixed(4)}`);
+            }
+          }
+
+          return messages.length > 0 ? `${label}: ${messages.join("; ")}` : null;
+        }
+
+        async function validateField(fieldConfig, value, pathSegments, errors, keyPath, lengthLimits) {
+          if (!fieldConfig) return;
+
+          validateTextLength(fieldConfig, value, pathSegments, keyPath, lengthLimits, errors);
+
+          if (fieldConfig.widget === "image") {
+            const rule = getRule(fieldConfig);
+            if (!rule || !value) return;
+
+            const url = resolveImageUrl(value);
+            if (!url) return;
+
+            const size = await getImageSize(url);
+            const label = formatPath(pathSegments);
+            const message = validateDimensions(label, size, rule);
+            if (message) errors.push(message);
+            return;
+          }
+
+          if (fieldConfig.widget === "object") {
+            const fields = fieldConfig.fields ?? [];
+            const objectValue = value ?? {};
+            for (const childField of fields) {
+              await validateField(
+                childField,
+                objectValue?.[childField.name],
+                pathSegments.concat(childField.label || childField.name),
+                errors,
+                `${keyPath}.${childField.name}`,
+                lengthLimits
+              );
+            }
+            return;
+          }
+
+          if (fieldConfig.widget === "list") {
+            const listValue = Array.isArray(value) ? value : [];
+            if (fieldConfig.field) {
+              for (let index = 0; index < listValue.length; index += 1) {
+                await validateField(
+                  fieldConfig.field,
+                  listValue[index],
+                  pathSegments.concat(`${fieldConfig.label || fieldConfig.name} #${index + 1}`),
+                  errors,
+                  `${keyPath}[]`,
+                  lengthLimits
+                );
+              }
+              return;
+            }
+
+            if (fieldConfig.fields) {
+              for (let index = 0; index < listValue.length; index += 1) {
+                const itemValue = listValue[index] ?? {};
+                for (const childField of fieldConfig.fields) {
+                  await validateField(
+                    childField,
+                    itemValue?.[childField.name],
+                    pathSegments.concat(`${fieldConfig.label || fieldConfig.name} #${index + 1}`, childField.label || childField.name),
+                    errors,
+                    `${keyPath}[].${childField.name}`,
+                    lengthLimits
+                  );
+                }
+              }
+              return;
+            }
+
+            const maxLength = lengthLimits?.[`${keyPath}[]`];
+            if (Number.isFinite(maxLength)) {
+              for (let index = 0; index < listValue.length; index += 1) {
+                const itemLength = getTextLength(listValue[index]);
+                if (itemLength > maxLength) {
+                  errors.push(`${formatPath(pathSegments.concat(`#${index + 1}`))}: максимум ${maxLength} символов, сейчас ${itemLength}`);
+                }
+              }
+            }
+          }
+        }
+
+        window.addEventListener("load", function () {
+          if (!window.CMS?.registerEventListener || !window.CMS?.getConfig) return;
+
+          window.CMS.registerEventListener({
+            name: "preSave",
+            handler: async ({ entry }) => {
+              const config = toPlain(window.CMS.getConfig());
+              const collectionName = entry?.get?.("collection");
+              const entryPath = entry?.get?.("path");
+              const collectionConfig = findCollectionConfig(config, collectionName);
+              const rootConfig = collectionConfig?.files ? findFileConfig(collectionConfig, entryPath) : collectionConfig;
+              const rootFields = rootConfig?.fields ?? [];
+              const data = toPlain(entry?.get?.("data")) ?? {};
+              const errors = [];
+              const textLengthLimits = await loadTextLengthLimits();
+              const lengthLimits = textLengthLimits[entryPath] ?? {};
+
+              for (const fieldConfig of rootFields) {
+                await validateField(
+                  fieldConfig,
+                  data[fieldConfig.name],
+                  [fieldConfig.label || fieldConfig.name],
+                  errors,
+                  fieldConfig.name,
+                  lengthLimits
+                );
+              }
+
+              if (errors.length > 0) {
+                throw new Error("Проверьте ограничения CMS-полей:\n" + errors.join("\n"));
+              }
+            },
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

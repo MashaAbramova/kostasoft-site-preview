@@ -1,0 +1,16 @@
+backend:
+  name: __PREVIEW_CMS_BACKEND_NAME__
+  repo: __PREVIEW_CMS_REPO__
+  branch: __PREVIEW_CMS_BRANCH__
+  auth_type: __PREVIEW_CMS_AUTH_TYPE__
+  app_id: __PREVIEW_CMS_APP_ID__
+  api_root: __PREVIEW_CMS_API_ROOT__
+  base_url: __PREVIEW_CMS_BASE_URL__
+  auth_endpoint: __PREVIEW_CMS_AUTH_ENDPOINT__
+
+local_backend: __PREVIEW_CMS_LOCAL_BACKEND__
+
+site_url: "__PREVIEW_CMS_SITE_URL__"
+display_url: "__PREVIEW_CMS_DISPLAY_URL__"
+logo_url: "__PREVIEW_CMS_LOGO_URL__"
+locale: "__PREVIEW_CMS_LOCALE__"

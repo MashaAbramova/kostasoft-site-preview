@@ -1,0 +1,113 @@
+"src/content/settings/ai-section.md":
+  eyebrow: 20
+  title: 63
+  lead: 413
+  "cards[].key": 12
+  "cards[].topText": 16
+  "cards[].topIcon": 38
+  "cards[].heading": 56
+  "cards[].subtitle": 62
+  "cards[].copy": 244
+  "cards[].image": 36
+"src/content/settings/clients-section.md":
+  eyebrow: 7
+  title: 12
+  titleSuffix: 22
+  "metrics[].icon": 8
+  "metrics[].value": 7
+  "metrics[].label": 21
+  "clients[].name": 42
+  "clients[].tags[]": 26
+  "clients[].description": 105
+  "clients[].workplaces": 4
+  "clients[].caseUrl": 25
+  "cta.buttons[].label": 20
+  "cta.buttons[].url": 13
+"src/content/settings/faq-section.md":
+  eyebrow: 3
+  title: 16
+  ctaLabel: 13
+  "items[].question": 72
+  "items[].answer": 408
+"src/content/settings/functionality-section.md":
+  title: 7
+  "groups[].back.backgroundImage": 36
+  "groups[].back.gridClass": 35
+  "groups[].back.items[].icon": 49
+  "groups[].back.items[].title": 38
+  "groups[].back.items[].text": 136
+  "groups[].front.icon": 41
+  "groups[].front.backgroundImage": 37
+  "groups[].front.heading": 34
+  "groups[].front.copy": 145
+  "groups[].front.footerImage": 40
+"src/content/settings/growth-section.md":
+  eyebrow: 11
+  title: 26
+  lead: 214
+  currentTitle: 17
+  "currentModules[].text": 24
+  laterTitle: 22
+  "laterModules[].text": 17
+"src/content/settings/hero-section.md":
+  kicker: 15
+  h1Line1: 19
+  h1Line2: 34
+  h1Line3: 25
+  lead: 156
+  ctaLabel: 22
+"src/content/settings/it-activity.md":
+  title: 27
+  eyebrow: 20
+  seoTitle: 35
+  seoDescription: 93
+  "intro[].text": 322
+  "details[].label": 24
+  "details[].value": 124
+  "details[].href": 24
+  accreditationTitle: 38
+  "accreditationParagraphs[].text": 219
+  activityTitle: 27
+  mainOkved: 88
+  additionalOkvedTitle: 21
+  "additionalOkved[].text": 78
+  activityCodesTitle: 80
+  "activityCodes[].title": 9
+  "activityCodes[].text": 898
+  servicesTitle: 24
+  servicesIntro: 124
+  servicesLead: 28
+  "serviceDirections[].text": 98
+  technologiesTitle: 34
+  technologiesIntro: 23
+  "technologies[].text": 25
+  priceTitle: 25
+  priceText: 86
+"src/content/settings/metrics-band.md":
+  "metrics[].value": 7
+  "metrics[].label": 37
+  "metrics[].image": 12
+"src/content/settings/news-home.md":
+  title: 19
+  buttonText: 11
+"src/content/settings/personal-data-page.md":
+  title: 41
+  eyebrow: 8
+  seoTitle: 52
+  seoDescription: 76
+  "intro[].text": 596
+  "sections[].title": 55
+  "sections[].listItems[]": 89
+  "sections[].paragraphs[].text": 364
+  footerNote: 99
+  footerContacts: 52
+"src/content/settings/privacy-page.md":
+  body: 17057
+"src/content/settings/site-footer.md":
+  footerVersion: 15
+"src/content/settings/support-section.md":
+  eyebrow: 25
+  title: 28
+  lead: 339
+  ctaLabel: 18
+  "services[].text": 62
