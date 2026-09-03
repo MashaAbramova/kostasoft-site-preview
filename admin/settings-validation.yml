@@ -3,11 +3,6 @@
   title: 63
   lead: 413
   "cards[].key": 12
-  "cards[].topText": 16
-  "cards[].topIcon": 38
-  "cards[].heading": 56
-  "cards[].subtitle": 62
-  "cards[].copy": 244
   "cards[].image": 36
 "src/content/settings/clients-section.md":
   eyebrow: 7
@@ -16,11 +11,6 @@
   "metrics[].icon": 8
   "metrics[].value": 7
   "metrics[].label": 21
-  "clients[].name": 42
-  "clients[].tags[]": 26
-  "clients[].description": 105
-  "clients[].workplaces": 4
-  "clients[].caseUrl": 25
   "cta.buttons[].label": 20
   "cta.buttons[].url": 13
 "src/content/settings/faq-section.md":

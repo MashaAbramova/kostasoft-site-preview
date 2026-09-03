@@ -115,12 +115,7 @@ collections:
                 options:
                   - { label: "Докки", value: "dokki" }
                   - { label: "Докки Эксперт", value: "dokki-expert" }
-              - { label: "Верхняя метка", name: "topText", widget: "string", pattern: *required_text_pattern }
-              - { label: "Иконка верхней метки (60x60 px)", name: "topIcon", widget: "image", required: false, hint: "Управляет элементом ai-card-stack-top-icon. Путь от public, например assets/dokki/dokki-top-icon.png." }
-              - { label: "Заголовок", name: "heading", widget: "string", pattern: *required_text_pattern }
-              - { label: "Подзаголовок", name: "subtitle", widget: "string", required: false, pattern: *required_text_pattern }
-              - { label: "Текст", name: "copy", widget: "text", pattern: *required_text_pattern }
-              - { label: "Изображение внутри карточки (924x730 px)", name: "image", widget: "image", required: false, hint: "Управляет элементом ai-card-stack-image. Путь от public, например assets/dokki/dokki-bottom.png." }
+              - { label: "Основное изображение карточки (924x730 px)", name: "image", widget: "image", required: false, hint: "Управляет изображением ai-card-base. Путь от public, например assets/dokki/dokki-bottom.png." }
       - name: "growthSection"
         label: "Блок развития"
         file: "src/content/settings/growth-section.md"
